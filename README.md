@@ -28,8 +28,8 @@ sudo apt install python3 python3-venv python3-pip
 ```
 3. (Recommended) Create a virtual environment
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate #Don't forget to enter the ve each time (plug into the matrix)
+python3 -m venv venv
+source venv/bin/activate #Don't forget to enter the ve each time (plug into the matrix)
 ```
 4. Install core packages
 ```bash
