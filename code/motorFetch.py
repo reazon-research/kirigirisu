@@ -19,7 +19,7 @@ try:
 
         #goal_positions = np.array([2048, 2048])  # midpoint for most Dynamixels
         #controller.set_goal_positions(goal_positions)
-        time.sleep(0.05)
+        time.sleep(0.1)
 
 except KeyboardInterrupt:
     controller.cleanup()

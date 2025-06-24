@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Motor Calibration</title>
+  <script src="/static/script.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    button { font-size: 24px; padding: 15px 30px; }
+  </style>
+</head>
+
+<body>
+  <h1>Motor Calibration</h1>
+  <button id="calibrate-btn" onclick="toggleCalibration()">Start Calibration</button>
+
+  <h2>Live Encoder Readings</h2>
+  <div id="readings">
+    <p>Motor 1: <span id="m1">--</span></p>
+    <p>Motor 2: <span id="m2">--</span></p>
+    <p>Motor 3: <span id="m3">--</span></p>
+  </div>
+
+</body>
+</html>
