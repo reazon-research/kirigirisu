@@ -22,38 +22,43 @@ Read joint positions, calibrate motion ranges, and integration with ROS 2 for ro
 git clone https://github.com/reazon-research/kirigirisu.git
 cd kirigirisu
 ```
-2. (Recommended) Create a virtual environment
+2. Install python dependancies if you haven't
+```bash
+sudo apt install python3 python3-venv python3-pip
+```
+3. (Recommended) Create a virtual environment
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate #Don't forget to enter the ve each time (plug into the matrix)
 ```
-3. Install dependencies
+4. Install core packages
 ```bash
 pip install -r requirements.txt
 ```
-4. Install Dynamixel SDK (C++ + Python)
+5. Install Dynamixel SDK (C++ & Python)
 ```bash
-# Install C++ SDK for Dynamixel
 sudo apt install -y cmake build-essential libusb-1.0-0-dev
-
-# Clone SDK
+```
+```bash
 cd ~
 git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git
-
-# Build and install C++ SDK
+```
+```bash
+#C++ installation:
 cd DynamixelSDK/c++/build
 cmake ..
 make
 sudo make install
-
-# Install Python SDK
+```
+```bash
+#Python installation:
 cd ~/DynamixelSDK/python
-pip install
+pip install .
 ```
 5. Serial port permissions
 ```bash
 sudo usermod -a -G dialout $USER
 sudo chmod 666 /dev/ttyUSB0
 
-#May need to login logout or sudo reboot here
+#May need to logout login or sudo reboot here
 ```
