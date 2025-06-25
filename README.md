@@ -67,7 +67,7 @@ sudo chmod 666 /dev/ttyUSB0
 
 ## Calibration Web Interface
 
-Kirigirisu includes a simple Flask + Three.js web UI to easily visualize and calibrate motor encoders to defined limits.
+Kirigirisu includes a simple Flask + Three.js web UI to easily visualize and calibrate encoders to defined limits.
 
 ![Screenshot from 2025-06-26 01-30-17](https://github.com/user-attachments/assets/cf7d2ade-93af-42c3-8f58-068425bd80b3)
 
