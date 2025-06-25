@@ -3,6 +3,7 @@ import numpy as np
 import random
 import socket
 import sys
+import threading
 
 ADDR_TORQUE_ENABLE = 64
 ADDR_GOAL_POSITION = 116
@@ -67,6 +68,8 @@ class DynamixelPort:
                 quit()
         self.present_currents = np.zeros((16), np.int16)
         self.present_positions = np.zeros((16), np.int32)
+        #prevent simultaneous access
+        self.lock = threading.Lock()
 
     def writeTxRx(self, dxl_id, addr, value):
         dxl_comm_result, dxl_error = self.packetHandler.__getattribute__(self.method_dict[value.itemsize])(self.portHandler, dxl_id, addr, int(value))
@@ -95,13 +98,21 @@ class DynamixelPort:
         self.portHandler.closePort()
 
     def fetch_present_status(self):
-        dxl_comm_result = self.groupSyncRead.txRxPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            return
-        for i, dxl_id in enumerate(self.dxl_ids):
-            if self.groupSyncRead.isAvailable(dxl_id, ADDR_PRESENT_CURRENT, 10):
-                self.present_currents[i] = np.array(self.groupSyncRead.getData(dxl_id, ADDR_PRESENT_CURRENT, 2)).astype(np.int16)
-                self.present_positions[i] = np.array(self.groupSyncRead.getData(dxl_id, ADDR_PRESENT_POSITION, 4)).astype(np.int32)
+        with self.lock:
+            dxl_comm_result = self.groupSyncRead.txRxPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                print(f"[ERROR] GroupSyncRead failed: {self.packetHandler.getTxRxResult(dxl_comm_result)}")
+                return
+
+            for i, dxl_id in enumerate(self.dxl_ids):
+                if self.groupSyncRead.isAvailable(dxl_id, ADDR_PRESENT_CURRENT, 10):
+                    self.present_currents[i] = np.array(
+                        self.groupSyncRead.getData(dxl_id, ADDR_PRESENT_CURRENT, 2)
+                    ).astype(np.int16)
+                    self.present_positions[i] = np.array(
+                        self.groupSyncRead.getData(dxl_id, ADDR_PRESENT_POSITION, 4)
+                    ).astype(np.int32)
+
 
     def set_goal_positions(self, pos):
         for dxl_id, p in zip(self.dxl_ids, pos):
@@ -155,4 +166,5 @@ class DynamixelPort:
             self.packetHandler.write1ByteTxRx(
                 self.portHandler, dxl_id, 64, 0
             )
+            
 

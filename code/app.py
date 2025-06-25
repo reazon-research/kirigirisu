@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 import threading
 import time
 import json
+import shutil
 
 import numpy as np
 from control.dynamixel_port import DynamixelPort
@@ -49,10 +50,14 @@ def save_results():
         for motor, values in min_max_values.items()
     }
 
-    with open("calibration.json", "w") as f:
+    # Save to temp file first
+    with open("calibration_temp.json", "w") as f:
         json.dump(cleaned, f, indent=2)
 
+    # Move it to static folder so frontend can fetch it
+    shutil.move("calibration_temp.json", "static/calibration.json")
     print("Calibration saved:", cleaned)
+
 
 @app.route("/")
 def index():
@@ -89,6 +94,8 @@ def encoder_values():
         f"motor_{i+1}": int(pos) for i, pos in enumerate(controller.present_positions)
     }
     return jsonify(joint_positions)
+
+
 
 #app.run
 if __name__ == "__main__":
