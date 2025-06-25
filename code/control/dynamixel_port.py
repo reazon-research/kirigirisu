@@ -36,8 +36,8 @@ class DynamixelPort:
         4 : "write4ByteTxRx"
     }
 
-    def __init__(self, device, dxl_ids, motor_with_torque,
-                 control_mode=PWM_CONTROL_MODE):
+    def __init__(self, device, dxl_ids, motor_with_torque, control_mode=PWM_CONTROL_MODE):
+        self.lock = threading.Lock() #prevent simultaneous access
         self.device = device
         self.dxl_ids = dxl_ids
         self.motor_with_torque = motor_with_torque
@@ -68,11 +68,10 @@ class DynamixelPort:
                 quit()
         self.present_currents = np.zeros((16), np.int16)
         self.present_positions = np.zeros((16), np.int32)
-        #prevent simultaneous access
-        self.lock = threading.Lock()
 
     def writeTxRx(self, dxl_id, addr, value):
         with self.lock:
+            method = getattr(self.packetHandler, self.method_dict[value.itemsize])
             dxl_comm_result, dxl_error = self.packetHandler.__getattribute__(self.method_dict[value.itemsize])(self.portHandler, dxl_id, addr, int(value))
             if dxl_comm_result != COMM_SUCCESS:
                 logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
