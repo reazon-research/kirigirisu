@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 controller = DynamixelPort(
     device="/dev/ttyUSB0",
-    dxl_ids=[1, 2, 3],
+    dxl_ids=[1, 2, 3], # 1 is the closest to the wrist
     motor_with_torque=[1, 2, 3]
 )
 
@@ -72,7 +72,11 @@ def toggle_calibration():
     else:
         print("Calibration stopped manually")
         calibrating = False
+        if calibration_thread and calibration_thread.is_alive():
+            calibration_thread.join()
+        save_results()
         return jsonify(status="stopped")
+
 
 @app.route("/status")
 def status():
@@ -86,7 +90,13 @@ def encoder_values():
     }
     return jsonify(joint_positions)
 
+#app.run
 if __name__ == "__main__":
+    #hides flask's logger from appearing
+    import logging
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+
     try:
         app.run(host="0.0.0.0", port=5000)
     except KeyboardInterrupt:

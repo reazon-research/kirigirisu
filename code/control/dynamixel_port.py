@@ -25,7 +25,8 @@ EXTENDED_POSITION_CONTROL_MODE = 4
 PWM_CONTROL_MODE = 16
 
 def logprint(message):
-    print(message, file=sys.stderr)
+    pass
+    # print(message, file=sys.stderr)
 
 class DynamixelPort:
     method_dict = {

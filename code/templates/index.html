@@ -2,23 +2,41 @@
 <html>
 <head>
   <title>Motor Calibration</title>
-  <script src="/static/script.js"></script>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-    button { font-size: 24px; padding: 15px 30px; }
-  </style>
 </head>
 
-<body>
-  <h1>Motor Calibration</h1>
-  <button id="calibrate-btn" onclick="toggleCalibration()">Start Calibration</button>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+      }
+    }
+  </script>
 
-  <h2>Live Encoder Readings</h2>
-  <div id="readings">
-    <p>Motor 1: <span id="m1">--</span></p>
-    <p>Motor 2: <span id="m2">--</span></p>
-    <p>Motor 3: <span id="m3">--</span></p>
+<body>
+  <div id="ui-overlay">
+    <h1>Motor Calibration</h1>
+    <button id="calibrate-btn" onclick="toggleCalibration()">
+      <div class="progress-bar" id="calibration-progress"></div>
+      <span>Start Calibration</span>
+    </button>
+
+    <h2>Live Encoder Readings</h2>
+    <div id="readings">
+      <p>Motor 1: <span id="m1">--</span></p>
+      <p>Motor 2: <span id="m2">--</span></p>
+      <p>Motor 3: <span id="m3">--</span></p>
+    </div>
   </div>
+
+  <div id="three-container">
+  </div>
+
+
+  <script src="/static/js/calibrate.js"></script>
+  <script type="module" src="/static/js/model.js"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 
 </body>
 </html>
