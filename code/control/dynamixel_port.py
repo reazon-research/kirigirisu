@@ -72,13 +72,14 @@ class DynamixelPort:
         self.lock = threading.Lock()
 
     def writeTxRx(self, dxl_id, addr, value):
-        dxl_comm_result, dxl_error = self.packetHandler.__getattribute__(self.method_dict[value.itemsize])(self.portHandler, dxl_id, addr, int(value))
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-            exit()
-        elif dxl_error != 0:
-            logprint("%s" % self.packetHandler.getRxPacketError(dxl_error))
-            exit()
+        with self.lock:
+            dxl_comm_result, dxl_error = self.packetHandler.__getattribute__(self.method_dict[value.itemsize])(self.portHandler, dxl_id, addr, int(value))
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+                exit()
+            elif dxl_error != 0:
+                logprint("%s" % self.packetHandler.getRxPacketError(dxl_error))
+                exit()
 
     def setup(self):
         for dxl_id in self.dxl_ids:
@@ -93,9 +94,10 @@ class DynamixelPort:
                 self.writeTxRx(dxl_id, ADDR_TORQUE_ENABLE, np.int8(TORQUE_ENABLE))
 
     def cleanup(self):
-        for dxl_id in self.dxl_ids:
-            self.writeTxRx(dxl_id, ADDR_TORQUE_ENABLE, np.int8(TORQUE_DISABLE))
-        self.portHandler.closePort()
+        with self.lock:
+            for dxl_id in self.dxl_ids:
+                self.writeTxRx(dxl_id, ADDR_TORQUE_ENABLE, np.int8(TORQUE_DISABLE))
+            self.portHandler.closePort()
 
     def fetch_present_status(self):
         with self.lock:
@@ -115,56 +117,61 @@ class DynamixelPort:
 
 
     def set_goal_positions(self, pos):
-        for dxl_id, p in zip(self.dxl_ids, pos):
-            param_goal_position = [DXL_LOBYTE(DXL_LOWORD(p)), DXL_HIBYTE(DXL_LOWORD(p)), DXL_LOBYTE(DXL_HIWORD(p)), DXL_HIBYTE(DXL_HIWORD(p))]
-            if self.pos_writer.addParam(dxl_id, param_goal_position) != True:
-                logprint("[ID:%03d] pos_writer addparam failed" % dxl_id)
-        dxl_comm_result = self.pos_writer.txPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-        self.pos_writer.clearParam()
+        with self.lock:
+            for dxl_id, p in zip(self.dxl_ids, pos):
+                param_goal_position = [DXL_LOBYTE(DXL_LOWORD(p)), DXL_HIBYTE(DXL_LOWORD(p)), DXL_LOBYTE(DXL_HIWORD(p)), DXL_HIBYTE(DXL_HIWORD(p))]
+                if self.pos_writer.addParam(dxl_id, param_goal_position) != True:
+                    logprint("[ID:%03d] pos_writer addparam failed" % dxl_id)
+            dxl_comm_result = self.pos_writer.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            self.pos_writer.clearParam()
 
     def set_goal_positions_currents(self, pos, cur):
-        for dxl_id, p, c in zip(self.dxl_ids, pos, cur):
-            param_goal_position = [DXL_LOBYTE(DXL_LOWORD(p)), DXL_HIBYTE(DXL_LOWORD(p)), DXL_LOBYTE(DXL_HIWORD(p)), DXL_HIBYTE(DXL_HIWORD(p))]
-            param_goal_current = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
-            if self.pos_writer.addParam(dxl_id, param_goal_position) != True:
-                logprint("[ID:%03d] pos_writer addparam failed" % dxl_id)
-            if self.cur_writer.addParam(dxl_id, param_goal_current) != True:
-                logprint("[ID:%03d] cur_writer addparam failed" % dxl_id)
-        dxl_comm_result = self.pos_writer.txPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-        self.pos_writer.clearParam()
-        dxl_comm_result = self.cur_writer.txPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-        self.cur_writer.clearParam()
+        with self.lock:
+            for dxl_id, p, c in zip(self.dxl_ids, pos, cur):
+                param_goal_position = [DXL_LOBYTE(DXL_LOWORD(p)), DXL_HIBYTE(DXL_LOWORD(p)), DXL_LOBYTE(DXL_HIWORD(p)), DXL_HIBYTE(DXL_HIWORD(p))]
+                param_goal_current = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
+                if self.pos_writer.addParam(dxl_id, param_goal_position) != True:
+                    logprint("[ID:%03d] pos_writer addparam failed" % dxl_id)
+                if self.cur_writer.addParam(dxl_id, param_goal_current) != True:
+                    logprint("[ID:%03d] cur_writer addparam failed" % dxl_id)
+            dxl_comm_result = self.pos_writer.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            self.pos_writer.clearParam()
+            dxl_comm_result = self.cur_writer.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            self.cur_writer.clearParam()
 
     def set_goal_currents(self, cur):
-        for dxl_id, c in zip(self.dxl_ids, cur):
-            param_goal_current = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
-            if self.cur_writer.addParam(dxl_id, param_goal_current) != True:
-                logprint("[ID:%03d] cur_writer addparam failed" % dxl_id)
-        dxl_comm_result = self.cur_writer.txPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-        self.cur_writer.clearParam()
+        with self.lock:
+            for dxl_id, c in zip(self.dxl_ids, cur):
+                param_goal_current = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
+                if self.cur_writer.addParam(dxl_id, param_goal_current) != True:
+                    logprint("[ID:%03d] cur_writer addparam failed" % dxl_id)
+            dxl_comm_result = self.cur_writer.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            self.cur_writer.clearParam()
 
     def set_goal_pwms(self, pwm):
-        for dxl_id, c in zip(self.dxl_ids, pwm):
-            param_goal_pwm = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
-            if self.pwm_writer.addParam(dxl_id, param_goal_pwm) != True:
-                logprint("[ID:%03d] pwm_writer addparam failed" % dxl_id)
-        dxl_comm_result = self.pwm_writer.txPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
-        self.pwm_writer.clearParam()
+        with self.lock:
+            for dxl_id, c in zip(self.dxl_ids, pwm):
+                param_goal_pwm = [DXL_LOBYTE(DXL_LOWORD(c)), DXL_HIBYTE(DXL_LOWORD(c))]
+                if self.pwm_writer.addParam(dxl_id, param_goal_pwm) != True:
+                    logprint("[ID:%03d] pwm_writer addparam failed" % dxl_id)
+            dxl_comm_result = self.pwm_writer.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                logprint("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            self.pwm_writer.clearParam()
 
     def disable_torque(self, ids):
-        for dxl_id in ids:
-            self.packetHandler.write1ByteTxRx(
-                self.portHandler, dxl_id, 64, 0
-            )
-            
+        with self.lock:
+            for dxl_id in ids:
+                self.packetHandler.write1ByteTxRx(
+                    self.portHandler, dxl_id, 64, 0
+                )
+                
 
