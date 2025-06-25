@@ -3,6 +3,7 @@ import threading
 import time
 import json
 import shutil
+import os
 
 import numpy as np
 from control.dynamixel_port import DynamixelPort
@@ -33,6 +34,7 @@ def calibrate_motors():
             min_max_values[i]["max"] = max(min_max_values[i]["max"], pos)
         time.sleep(1)
     save_results()
+    time.sleep(1)
     calibrating = False
 
 def save_results():
@@ -41,7 +43,6 @@ def save_results():
             return int(obj)
         return obj
 
-    # Convert all values to plain ints
     cleaned = {
         motor: {
             "min": convert(values["min"]),
@@ -50,13 +51,15 @@ def save_results():
         for motor, values in min_max_values.items()
     }
 
-    # Save to temp file first
-    with open("calibration_temp.json", "w") as f:
+    temp_path = os.path.join(os.path.dirname(__file__), "calibration_temp.json")
+    static_path = os.path.join(os.path.dirname(__file__), "static", "calibration.json")
+
+    with open(temp_path, "w") as f:
         json.dump(cleaned, f, indent=2)
 
-    # Move it to static folder so frontend can fetch it
-    shutil.move("calibration_temp.json", "static/calibration.json")
+    shutil.move(temp_path, static_path)
     print("Calibration saved:", cleaned)
+    return cleaned
 
 
 @app.route("/")
@@ -68,24 +71,48 @@ def toggle_calibration():
     global calibrating, calibration_thread, min_max_values
 
     if not calibrating:
-        print("Calibration started")
+        print("[FLASK] Calibration starting")
         calibrating = True
         min_max_values = {i: {"min": float("inf"), "max": float("-inf")} for i in range(3)}
+
         calibration_thread = threading.Thread(target=calibrate_motors)
         calibration_thread.start()
+
         return jsonify(status="started")
+
     else:
-        print("Calibration stopped manually")
-        calibrating = False
+        print("[FLASK] Calibration stopping, waiting for thread to finish...")
+        calibrating = False  # signal thread to stop
+
         if calibration_thread and calibration_thread.is_alive():
-            calibration_thread.join()
-        save_results()
-        return jsonify(status="stopped")
+            calibration_thread.join()  # BLOCK until done
+
+        cleaned = save_results()
+        print(f"[FLASK] Calibration stopped, results: {cleaned}")
+        return jsonify(status="stopped", calibration=cleaned)
+
+
+def delayed_save(thread):
+    thread.join()
+    save_results()
+
+def delayed_save_and_return():
+    calibration_thread.join()
+    cleaned = save_results()
+    print("Delayed calibration result:", cleaned)
 
 
 @app.route("/status")
 def status():
+    # Only include calibration data if calibration is done
+    if not calibrating:
+        with open(os.path.join(app.static_folder, "calibration.json")) as f:
+            calibration = json.load(f)
+        return jsonify(running=calibrating, calibration=calibration)
+
     return jsonify(running=calibrating)
+
+
 
 @app.route("/encoder_values")
 def encoder_values():
@@ -95,7 +122,9 @@ def encoder_values():
     }
     return jsonify(joint_positions)
 
-
+@app.route('/calibration-data')
+def serve_calibration_data():
+    return app.send_static_file('calibration.json')
 
 #app.run
 if __name__ == "__main__":
