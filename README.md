@@ -62,3 +62,26 @@ sudo chmod 666 /dev/ttyUSB0
 
 #May need to logout login or sudo reboot here
 ```
+
+---
+
+## Calibration Web Interface
+
+Kirigirisu includes a simple Flask + Three.js web UI to easily visualize and calibrate motor encoders to defined limits.
+
+![Screenshot from 2025-06-26 01-30-17](https://github.com/user-attachments/assets/cf7d2ade-93af-42c3-8f58-068425bd80b3)
+
+To start the web server:
+
+```bash
+source venv/bin/activate
+python3 code/web.py
+```
+Then open http://localhost:5000 in your browser. (You may need to refresh the webpage.)
+
+Press Ctrl+C in the terminal to stop the program.
+
+1. Click “Start Calibrating” to begin automatically capturing encoder values.
+2. Move the motors through their full range during the 10-second calibration window.
+3. You can click the button again to stop early.
+4. The recorded min/max positions will be saved and applied immediately to update the model.
