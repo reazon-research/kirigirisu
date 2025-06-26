@@ -99,12 +99,7 @@ source /opt/ros/jazzy/setup.bash
 ```bash
 source venv/bin/activate
 ```
-3. Build and source your workspace
-```bash
-colcon build
-source install/setup.bash
-```
-4. Run the python excecutables
+3. Run the python excecutables
 ```bash
 python3 code/ros2Bridge/bridgeCode/bridge_node.py
 ```
