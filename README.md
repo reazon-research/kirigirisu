@@ -87,3 +87,24 @@ Press Ctrl+C in the terminal to stop the program.
 2. Move the motors through their full range during the 10-second calibration window.
 3. You can click the button again to stop early.
 4. The recorded min/max positions will be saved and applied immediately to update the model.
+
+---
+
+## Run ROS 2 simulation
+1. Source your verison of ros2 ([get the openarm one here](https://github.com/reazon-research/openarm_ros2))
+```bash
+source /opt/ros/jazzy/setup.bash
+```
+2. Make sure your python virtual environemnt is active
+```bash
+source venv/bin/activate
+```
+3. Build and source your workspace
+```bash
+colcon build
+source install/setup.bash
+```
+4. Run the python excecutables
+```bash
+python3 code/ros2Bridge/bridgeCode/bridge_node.py
+```
