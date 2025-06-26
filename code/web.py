@@ -11,7 +11,7 @@ from control.dynamixel_port import DynamixelPort
 app = Flask(__name__)
 
 controller = None
-MOTOR_IDS = [1, 2, 3]
+MOTOR_IDS = [1, 2, 3] # Starting from the wrist
 
 try:
     print("[INIT] Attempting to initialize Dynamixel controller... (If fails: check power connection to board)")
