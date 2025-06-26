@@ -62,6 +62,8 @@ sudo chmod 666 /dev/ttyUSB0
 
 #May need to logout login or sudo reboot here
 ```
+Connect motors and assign different IDs with [Dynamixel Wizard](https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/).  
+Then change MOTOR_IDS located at the top of the .py files to corespond accordingly.
 
 ---
 
