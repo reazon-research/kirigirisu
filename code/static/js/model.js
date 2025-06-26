@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let scene, camera, renderer, model;
 let calibrationData = {};
-const boneNames = ["Bone", "Bone001", "Bone002", "Bone012", "Bone013"];  // Replace with your actual bone names
+const boneNames = ["Bone", "Bone001", "Bone002", "Bone012", "Bone013", "Bone004", "Bone006", "Bone010", "Bone014", "Bone016", "Bone017"];  // Replace with your actual bone names
 const boneRotations = {};  // key: bone name, value: bone object
 
 // Setup scene
@@ -146,13 +146,20 @@ async function animate() {
     const calibration3 = calibrationData["2"];
 
     // Bone controls
-    applyRotation("Bone001", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4);
-    applyRotation("Bone002", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4);
-    applyRotation("Bone001", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4);
-    applyRotation("Bone002", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4);
-    applyRotation("Bone012", encoder3, calibration3, "z", Math.PI/2 - Math.PI/13, Math.PI/2 + Math.PI/13);
-    applyRotation("Bone013", encoder3, calibration3, "z", Math.PI/1.8 + Math.PI/13, Math.PI/1.8 - Math.PI/13);
+    applyRotation("Bone001", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4); //chiken base
+    applyRotation("Bone002", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4); //chicken head
+    applyRotation("Bone001", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4); //chiken base
+    applyRotation("Bone002", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4); //chicken head
+    applyRotation("Bone012", encoder3, calibration3, "z", Math.PI/2 - Math.PI/13, Math.PI/2 + Math.PI/13); //top beak
+    applyRotation("Bone013", encoder3, calibration3, "z", Math.PI/1.8 + Math.PI/13, Math.PI/1.8 - Math.PI/13); //bottom peak
 
+    boneRotations["Bone004"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
+    boneRotations["Bone006"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
+    boneRotations["Bone010"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
+
+    boneRotations["Bone014"].rotation.z = boneRotations["Bone013"].rotation.z + Math.PI/52;
+    boneRotations["Bone016"].rotation.z = boneRotations["Bone014"].rotation.z *0.1;
+    boneRotations["Bone017"].rotation.z = boneRotations["Bone001"].rotation.z *2.4;
 
     renderer.render(scene, camera);
 }

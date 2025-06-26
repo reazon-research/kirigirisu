@@ -10,11 +10,29 @@ from control.dynamixel_port import DynamixelPort
 
 app = Flask(__name__)
 
-controller = DynamixelPort(
-    device="/dev/ttyUSB0",
-    dxl_ids=[1, 2, 3], # 1 is the closest to the wrist
-    motor_with_torque=[1, 2, 3]
-)
+controller = None
+MOTOR_IDS = [1, 2, 3]
+
+try:
+    print("[INIT] Attempting to initialize Dynamixel controller... (If fails: check power connection to board)")
+    from control.dynamixel_port import DynamixelPort
+
+    controller = DynamixelPort(
+        device="/dev/ttyUSB0",
+        dxl_ids=MOTOR_IDS,
+        motor_with_torque=MOTOR_IDS
+    )
+    controller.disable_torque(MOTOR_IDS)
+    print("[INIT] Dynamixel controller initialized successfully.")
+
+except Exception as e:
+    print("[ERROR] Failed during Dynamixel controller setup.")
+    print("        Details:", e)
+
+if controller is None:
+    print("[EXIT] Dynamixel controller not available. Aborting.")
+    raise SystemExit()
+
 
 controller.disable_torque([1, 2, 3])
 
