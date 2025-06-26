@@ -103,3 +103,9 @@ source venv/bin/activate
 ```bash
 python3 code/ros2Bridge/bridgeCode/bridge_node.py
 ```
+To run ros2 openarm demo:
+```bash
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch openarm_bimanual_moveit_config demo.launch.py
+```
