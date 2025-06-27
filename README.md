@@ -3,7 +3,7 @@
 Kirigirisu is a Python-based toolkit for interacting with Dynamixel motors.
 
 Read joint positions, calibrate motion ranges, and integration with ROS 2 for robot simulation and control.
-
+ 
 ---
 
 ## Requirements
