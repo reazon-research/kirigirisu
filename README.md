@@ -3,7 +3,7 @@
 Kirigirisu is a Python-based toolkit for interacting with Dynamixel motors.
 
 Read joint positions, calibrate motion ranges, and integration with ROS 2 for robot simulation and control.
- 
+
 ---
 
 ## Requirements
@@ -11,7 +11,7 @@ Read joint positions, calibrate motion ranges, and integration with ROS 2 for ro
 - Python 3.8+
 - [Dynamixel SDK (Python)](https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_sdk/overview/)
 - U2D2 + U2D2 Power Hub
-- Dynamixel motors (ie: XC330-T181-T)
+- Dynamixel motors (ie: XC330-T181-T 12V or XC330-M077-T 5V)
 - [ROS 2](https://github.com/reazon-research/openarm_ros2) (optional for sim)
 
 ---
@@ -62,10 +62,24 @@ sudo chmod 666 /dev/ttyUSB0
 
 #May need to logout login or sudo reboot here
 ```
-Connect motors and assign different IDs with [Dynamixel Wizard](https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/).  
-Then change MOTOR_IDS located at the top of the .py files to corespond accordingly.
 
 ---
+
+## Motor Setup
+
+Warning: All new Dynamixel motors ship with the default ID 1.  
+To avoid conflicts, assign each motor an unique ID using [Dynamixel Wizard 2](https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/):  
+1. Connect each motor one at a time and scan with baudrate set to 57600.  
+2. Select motor's ID and change to another value on the panel to the right, scroll down and save.  
+3. Once done, daisy chain all motors together and update MOTOR_IDS:
+```bash
+MOTOR_IDS = [0, 1, 2, 10, 11, 12] # Default, change in all files to the IDs you assignned
+```
+Make sure to check your motor's min/max voltages and supply accordingly!
+```bash
+[INFO] Hardware Error Status for ID 10: 1 -> ['Input Voltage Error'] # Means your supplied voltage is too low or high
+```
+
 
 ## Calibration Web Interface
 
@@ -102,10 +116,4 @@ source venv/bin/activate
 3. Run the python excecutables
 ```bash
 python3 code/ros2Bridge/bridgeCode/bridge_node.py
-```
-To run ros2 openarm demo:
-```bash
-source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
-ros2 launch openarm_bimanual_moveit_config demo.launch.py
 ```
