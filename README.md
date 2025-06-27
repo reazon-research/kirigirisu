@@ -71,7 +71,7 @@ Warning: All new Dynamixel motors ship with the default ID 1.
 To avoid conflicts, assign each motor an unique ID using [Dynamixel Wizard 2](https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/):  
 1. Connect each motor one at a time and scan with baudrate set to 57600.  
 2. Select motor's ID and change to another value on the panel to the right, scroll down and save.  
-3. Once done, daisy chain all motors together and update MOTOR_IDS:
+3. Once done, daisy chain all motors together through TTL and update MOTOR_IDS:
 ```bash
 MOTOR_IDS = [0, 1, 2, 10, 11, 12] # Default, change in all files to the IDs you assignned
 ```
