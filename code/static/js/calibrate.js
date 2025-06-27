@@ -91,9 +91,12 @@ function pollEncoderValues() {
     fetch("/encoder_values")
       .then(res => res.json())
       .then(data => {
-        document.getElementById("m1").innerText = data.motor_1;
-        document.getElementById("m2").innerText = data.motor_2;
-        document.getElementById("m3").innerText = data.motor_3;
+        Object.keys(data).forEach((motorId) => {
+          const el = document.getElementById(motorId);  // e.g., "motor_0", "motor_10"
+          if (el) {
+            el.innerText = data[motorId];
+          }
+        });
       });
   }, 100);
 }

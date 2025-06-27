@@ -3,13 +3,14 @@ import time
 import numpy as np
 
 
-MOTOR_IDS = [1, 2, 3] # Starting from the wrist
+MOTOR_IDS = [2, 10] # Starting from the wrist
 
 controller = DynamixelPort(
     device="/dev/ttyUSB0",
     dxl_ids=MOTOR_IDS,
     motor_with_torque=MOTOR_IDS
 )
+print("get")
 
 controller.disable_torque(MOTOR_IDS)
 

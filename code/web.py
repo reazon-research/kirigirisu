@@ -4,17 +4,17 @@ import time
 import json
 import shutil
 import os
+from collections import defaultdict
 
 import numpy as np
-from control.dynamixel_port import DynamixelPort
 
 app = Flask(__name__)
 
 controller = None
-MOTOR_IDS = [1, 2, 3] # Starting from the wrist
+MOTOR_IDS = [0, 1, 2, 10, 11, 12] # Starting from the wrist
 
 try:
-    print("[INIT] Attempting to initialize Dynamixel controller... (If fails: check power connection to board)")
+    print("[INIT] Attempting to initialize Dynamixel controller...")
     from control.dynamixel_port import DynamixelPort
 
     controller = DynamixelPort(
@@ -33,23 +33,20 @@ if controller is None:
     print("[EXIT] Dynamixel controller not available. Aborting.")
     raise SystemExit()
 
-
-controller.disable_torque([1, 2, 3])
-
 # Calibration state
 calibrating = False
 calibration_thread = None
-min_max_values = {i: {"min": float("inf"), "max": float("-inf")} for i in range(3)}
+min_max_values = {motor_id: {"min": float("inf"), "max": float("-inf")} for motor_id in MOTOR_IDS}
 
 def calibrate_motors():
     global calibrating, min_max_values
     start_time = time.time()
     while calibrating and (time.time() - start_time < 10):
         controller.fetch_present_status()
-        for i, motor_id in enumerate([1, 2, 3]):
+        for i, motor_id in enumerate(MOTOR_IDS):
             pos = controller.present_positions[i]
-            min_max_values[i]["min"] = min(min_max_values[i]["min"], pos)
-            min_max_values[i]["max"] = max(min_max_values[i]["max"], pos)
+            min_max_values[motor_id]["min"] = min(min_max_values[motor_id]["min"], pos)
+            min_max_values[motor_id]["max"] = max(min_max_values[motor_id]["max"], pos)
         time.sleep(1)
     save_results()
     time.sleep(1)
@@ -91,7 +88,7 @@ def toggle_calibration():
     if not calibrating:
         print("[FLASK] Calibration starting")
         calibrating = True
-        min_max_values = {i: {"min": float("inf"), "max": float("-inf")} for i in range(3)}
+        min_max_values = defaultdict(lambda: {"min": float('inf'), "max": float('-inf')})
 
         calibration_thread = threading.Thread(target=calibrate_motors)
         calibration_thread.start()
@@ -136,7 +133,8 @@ def status():
 def encoder_values():
     controller.fetch_present_status()
     joint_positions = {
-        f"motor_{i+1}": int(pos) for i, pos in enumerate(controller.present_positions)
+        f"motor_{motor_id}": int(controller.present_positions[i])
+        for i, motor_id in enumerate(MOTOR_IDS)
     }
     return jsonify(joint_positions)
 

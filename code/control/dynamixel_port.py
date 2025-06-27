@@ -14,6 +14,7 @@ ADDR_POSITION_I_GAIN = 82
 ADDR_POSITION_P_GAIN = 84
 ADDR_PRESENT_CURRENT = 126
 ADDR_PRESENT_POSITION = 132
+ADDR_HARDWARE_ERROR_STATUS = 70
 PROTOCOL_VERSION = 2.0
 BAUDRATE = 57600
 BIMANUAL_PORT = 9000
@@ -26,8 +27,8 @@ EXTENDED_POSITION_CONTROL_MODE = 4
 PWM_CONTROL_MODE = 16
 
 def logprint(message):
-    pass
-    # print(message, file=sys.stderr)
+    #pass
+    print(message, file=sys.stderr)
 
 class DynamixelPort:
     method_dict = {
@@ -172,5 +173,50 @@ class DynamixelPort:
                 self.packetHandler.write1ByteTxRx(
                     self.portHandler, dxl_id, 64, 0
                 )
-                
 
+def decode_hardware_error(error_code):
+    errors = []
+    if error_code & 0x01: errors.append("Input Voltage Error")
+    if error_code & 0x02: errors.append("Overheating Error")
+    if error_code & 0x04: errors.append("Motor Encoder Error")
+    if error_code & 0x08: errors.append("Electrical Shock Error")
+    if error_code & 0x10: errors.append("Overload Error")
+    if error_code & 0x20: errors.append("Driver Fault Error")
+    if error_code & 0x40: errors.append("EEPROM Error")
+    if not errors:
+        errors.append("No Hardware Error")
+    return errors
+
+def check_hardware_error(packetHandler, portHandler, dxl_id):
+    data, dxl_comm_result, dxl_error = packetHandler.read1ByteTxRx(
+        portHandler, dxl_id, ADDR_HARDWARE_ERROR_STATUS)
+
+    if dxl_comm_result != COMM_SUCCESS:
+        print(f"[ERROR] Communication failed: {packetHandler.getTxRxResult(dxl_comm_result)}")
+        return
+    elif dxl_error != 0:
+        print(f"[ERROR] Packet error: {packetHandler.getRxPacketError(dxl_error)}")
+
+    error_list = decode_hardware_error(data)
+    print(f"[INFO] Hardware Error Status for ID {dxl_id}: {data} -> {error_list}")
+
+
+# Initialize port and packet handlers (adjust device name and baudrate)
+portHandler = PortHandler("/dev/ttyUSB0")
+packetHandler = PacketHandler(PROTOCOL_VERSION)
+
+if not portHandler.openPort():
+    print("Failed to open port")
+    exit()
+
+if not portHandler.setBaudRate(BAUDRATE):
+    print("Failed to set baudrate")
+    exit()
+
+# Replace with your actual motor ID
+motor_id = 10
+
+check_hardware_error(packetHandler, portHandler, motor_id)
+
+# Close the port after you're done
+portHandler.closePort()

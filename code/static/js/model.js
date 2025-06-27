@@ -5,6 +5,9 @@ let scene, camera, renderer, model;
 let calibrationData = {};
 const boneNames = ["Bone", "Bone001", "Bone002", "Bone012", "Bone013", "Bone004", "Bone006", "Bone010", "Bone014", "Bone016", "Bone017"];  // Replace with your actual bone names
 const boneRotations = {};  // key: bone name, value: bone object
+const chicken1Bones = {};
+const chicken2Bones = {};
+
 
 // Setup scene
 scene = new THREE.Scene();
@@ -24,33 +27,36 @@ scene.add(directionalLight);
 
 // Load model
 const loader = new GLTFLoader();
+
 loader.load('/static/models/chikenjiggle.glb', (gltf) => {
-    model = gltf.scene;
-    scene.add(model);
+    const model1 = gltf.scene;
+    model1.position.set(-0.5, 0, 0);
+    model1.lookAt(camera.position);
+    scene.add(model1);
+    extractBones(model1, chicken1Bones);
 
-    // Log bones for inspection
-    model.traverse((obj) => {
-        if (obj.isBone) console.log("Bone:", obj.name);
+    loader.load('/static/models/chikenjiggle.glb', (gltf2) => {
+        const model2 = gltf2.scene;
+        model2.position.set(0.5, 0, 0);
+        model2.lookAt(camera.position);
+        scene.add(model2);
+        extractBones(model2, chicken2Bones);
     });
+    
+    animate();
+});
 
-    // Get all bones we care about
-    boneNames.forEach((name) => {
-        const bone = model.getObjectByName(name);
-        if (bone) {
-            boneRotations[name] = bone;
-        } else {
-            console.warn(`Bone not found: ${name}`);
+function extractBones(model, boneMap) {
+    model.traverse((obj) => {
+        if (obj.isBone && boneNames.includes(obj.name)) {
+            boneMap[obj.name] = obj;
         }
     });
 
-    //example: inital rotate
-    const bone = model.getObjectByName("Bone");
-    if (bone) {
-        bone.rotation.y = Math.PI / 2;  // 90 degree rotation
+    if (boneMap["Bone"]) {
+        boneMap["Bone"].rotation.y = Math.PI / 2;
     }
-
-    animate();
-});
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -119,13 +125,12 @@ function mapEncoderToRotation(value, min, max, minRot, maxRot) {
     return minRot + ratio * (maxRot - minRot);
 }
 
-function applyRotation(boneName, encoderValue, calibration, axis, minRot, maxRot) {
-  const bone = boneRotations[boneName];
+function applyRotation(boneName, encoderValue, calibration, axis, minRot, maxRot, boneMap) {
+  const bone = boneMap[boneName];
   if (!bone || !calibration) return;
   const rot = mapEncoderToRotation(encoderValue, calibration.min, calibration.max, minRot, maxRot);
   bone.rotation[axis] = rot;
 }
-
 
 //Loop render
 async function animate() {
@@ -135,31 +140,54 @@ async function animate() {
     const data = await fetchEncoderValues();
     if (!data) return;
 
-    // Motor 1
-    const encoder1 = data.motor_1;
-    const calibration1 = calibrationData["0"];
-    // Motor 2
-    const encoder2 = data.motor_2;
-    const calibration2 = calibrationData["1"];
-    // Motor 3
-    const encoder3 = data.motor_3;
-    const calibration3 = calibrationData["2"];
+    // Chicken 1
+    const enc0 = data.motor_0;
+    const cal0 = calibrationData["0"];
+    const enc1 = data.motor_1;
+    const cal1 = calibrationData["1"];
+    const enc2 = data.motor_2;
+    const cal2 = calibrationData["2"];
+
+    applyRotation("Bone001", enc0, cal0, "z",  -Math.PI / 4, Math.PI / 4, chicken1Bones);
+    applyRotation("Bone002", enc0, cal0, "z",  -Math.PI / 4, Math.PI / 4, chicken1Bones);
+    applyRotation("Bone001", enc1, cal1, "x",  Math.PI / 4, -Math.PI / 4, chicken1Bones);
+    applyRotation("Bone002", enc1, cal1, "x",  Math.PI / 4, -Math.PI / 4, chicken1Bones);
+    applyRotation("Bone012", enc2, cal2, "z",  Math.PI/2 + Math.PI/13, Math.PI/2 - Math.PI/13, chicken1Bones);
+    applyRotation("Bone013", enc2, cal2, "z",  Math.PI/1.8 - Math.PI/13, Math.PI/1.8 + Math.PI/13, chicken1Bones);
+
+    chicken1Bones["Bone004"].rotation.x = -chicken1Bones["Bone001"].rotation.x * 1.1;
+    chicken1Bones["Bone006"].rotation.x = -chicken1Bones["Bone001"].rotation.x * 1.1;
+    chicken1Bones["Bone010"].rotation.x = -chicken1Bones["Bone001"].rotation.x * 1.1;
+
+    chicken1Bones["Bone014"].rotation.z = chicken1Bones["Bone013"].rotation.z + Math.PI/52;
+    chicken1Bones["Bone016"].rotation.z = chicken1Bones["Bone014"].rotation.z * 0.1;
+    chicken1Bones["Bone017"].rotation.z = chicken1Bones["Bone001"].rotation.z * 2.4;
+
+
+    /// Chicken 2
+    const enc10 = data.motor_10;
+    const cal10 = calibrationData["10"];
+    const enc11 = data.motor_11;
+    const cal11 = calibrationData["11"];
+    const enc12 = data.motor_12;
+    const cal12 = calibrationData["12"];
 
     // Bone controls
-    applyRotation("Bone001", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4); //chiken base
-    applyRotation("Bone002", encoder1, calibration1, "z", -Math.PI / 4, Math.PI / 4); //chicken head
-    applyRotation("Bone001", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4); //chiken base
-    applyRotation("Bone002", encoder2, calibration2, "x", Math.PI / 4, -Math.PI / 4); //chicken head
-    applyRotation("Bone012", encoder3, calibration3, "z", Math.PI/2 - Math.PI/13, Math.PI/2 + Math.PI/13); //top beak
-    applyRotation("Bone013", encoder3, calibration3, "z", Math.PI/1.8 + Math.PI/13, Math.PI/1.8 - Math.PI/13); //bottom peak
+    applyRotation("Bone001", enc10, cal10, "z",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
+    applyRotation("Bone002", enc10, cal10, "z",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
+    applyRotation("Bone001", enc11, cal11, "x",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
+    applyRotation("Bone002", enc11, cal11, "x",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
+    applyRotation("Bone012", enc12, cal12, "z",  Math.PI/2 + Math.PI/13, Math.PI/2 - Math.PI/13, chicken2Bones);
+    applyRotation("Bone013", enc12, cal12, "z",  Math.PI/1.8 - Math.PI/13, Math.PI/1.8 + Math.PI/13, chicken2Bones);
 
-    boneRotations["Bone004"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
-    boneRotations["Bone006"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
-    boneRotations["Bone010"].rotation.x = -boneRotations["Bone001"].rotation.x * 1.1;
+    chicken2Bones["Bone004"].rotation.x = -chicken2Bones["Bone001"].rotation.x * 1.1;
+    chicken2Bones["Bone006"].rotation.x = -chicken2Bones["Bone001"].rotation.x * 1.1;
+    chicken2Bones["Bone010"].rotation.x = -chicken2Bones["Bone001"].rotation.x * 1.1;
 
-    boneRotations["Bone014"].rotation.z = boneRotations["Bone013"].rotation.z + Math.PI/52;
-    boneRotations["Bone016"].rotation.z = boneRotations["Bone014"].rotation.z *0.1;
-    boneRotations["Bone017"].rotation.z = boneRotations["Bone001"].rotation.z *2.4;
+    chicken2Bones["Bone014"].rotation.z = chicken2Bones["Bone013"].rotation.z + Math.PI/52;
+    chicken2Bones["Bone016"].rotation.z = chicken2Bones["Bone014"].rotation.z * 0.1;
+    chicken2Bones["Bone017"].rotation.z = chicken2Bones["Bone001"].rotation.z * 2.4;
+
 
     renderer.render(scene, camera);
 }
