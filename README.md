@@ -116,7 +116,7 @@ source /opt/ros/jazzy/setup.bash
 source ~/ros2_ws/install/setup.bash
 source venv/bin/activate
 
-python3 code/ros2Bridge/bridgeCode/bridge_node.py
+python3 code/ros2Bridge/bridgeCode/bridgeNode.py
 ```
 2. Open another terminal window:
 - go to openarm's ros2_ws
