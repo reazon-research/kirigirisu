@@ -177,8 +177,8 @@ async function animate() {
     applyRotation("Bone002", enc10, cal10, "z",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
     applyRotation("Bone001", enc11, cal11, "x",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
     applyRotation("Bone002", enc11, cal11, "x",  Math.PI / 4, -Math.PI / 4, chicken2Bones);
-    applyRotation("Bone012", enc12, cal12, "z",  Math.PI/2 + Math.PI/13, Math.PI/2 - Math.PI/13, chicken2Bones);
-    applyRotation("Bone013", enc12, cal12, "z",  Math.PI/1.8 - Math.PI/13, Math.PI/1.8 + Math.PI/13, chicken2Bones);
+    applyRotation("Bone012", enc12, cal12, "z",  Math.PI/2 - Math.PI/13, Math.PI/2 + Math.PI/13, chicken2Bones);
+    applyRotation("Bone013", enc12, cal12, "z",  Math.PI/1.8 + Math.PI/13, Math.PI/1.8 - Math.PI/13, chicken2Bones);
 
     chicken2Bones["Bone004"].rotation.x = -chicken2Bones["Bone001"].rotation.x * 1.1;
     chicken2Bones["Bone006"].rotation.x = -chicken2Bones["Bone001"].rotation.x * 1.1;
