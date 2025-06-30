@@ -107,7 +107,7 @@ Press Ctrl+C in the terminal to stop the program.
 ## Run ROS 2 simulation
 1. In one terminal window:
 - go to kirigirisu
-- source your verison of ros2, the ([openarm ros2](https://github.com/reazon-research/openarm_ros2)), and open the ve
+- source your verison of ros2, the [openarm ros2](https://github.com/reazon-research/openarm_ros2), and open the ve
 - run the python bridge executable
 ```bash
 cd kirigirisu
