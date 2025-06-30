@@ -100,20 +100,33 @@ Press Ctrl+C in the terminal to stop the program.
 1. Click “Start Calibrating” to begin automatically capturing encoder values.
 2. Move the motors through their full range during the 10-second calibration window.
 3. You can click the button again to stop early.
-4. The recorded min/max positions will be saved and applied immediately to update the model.
+4. The recorded min/max positions will be saved and applied after a while to update the model.
 
 ---
 
 ## Run ROS 2 simulation
-1. Source your verison of ros2 ([get the openarm one here](https://github.com/reazon-research/openarm_ros2))
+1. In one terminal window:
+- go to kirigirisu
+- source your verison of ros2, the ([openarm ros2](https://github.com/reazon-research/openarm_ros2)), and open the ve
+- run the python bridge executable
 ```bash
+cd kirigirisu
+
 source /opt/ros/jazzy/setup.bash
-```
-2. Make sure your python virtual environemnt is active
-```bash
+source ~/ros2_ws/install/setup.bash
 source venv/bin/activate
-```
-3. Run the python excecutables
-```bash
+
 python3 code/ros2Bridge/bridgeCode/bridge_node.py
+```
+2. Open another terminal window:
+- go to openarm's ros2_ws
+- source your verison of ros2, then itself
+- run the kirigirisu launcher
+```bash
+cd ros2_ws
+
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+
+ros2 launch openarm_bimanual_description kirigirisu.launch.py
 ```
