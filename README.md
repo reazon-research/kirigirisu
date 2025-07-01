@@ -120,10 +120,13 @@ python3 code/ros2Bridge/bridgeCode/bridgeNode.py
 ```
 Open another terminal window:
 1. Go to openarm's ros2_ws
-2. Source your verison of ros2, then itself
-3. Run the kirigirisu launcher
+2. Checkout to the kirigirisu branch for the launch options
+3. Source your verison of ros2, then itself
+4. Run the kirigirisu launcher
 ```bash
 cd ros2_ws
+
+git checkout kirigirisu
 
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
