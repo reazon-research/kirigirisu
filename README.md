@@ -107,7 +107,7 @@ Press Ctrl+C in the terminal to stop the program.
 ## Run ROS 2 simulation
 In one terminal window:
 1. Go to kirigirisu
-2. Source your verison of ros2, the [openarm ros2](https://github.com/reazon-research/openarm_ros2), and open the ve
+2. Source your verison of ros2, the [openarm ros2 kirigirisu branch](https://github.com/reazon-research/openarm_ros2/tree/kirigirisu), and open the ve
 3. Run the python bridge executable
 ```bash
 cd kirigirisu
@@ -133,3 +133,6 @@ source install/setup.bash
 
 ros2 launch openarm_bimanual_description kirigirisu.launch.py
 ```
+
+
+For april-tag tracking and whole arm IK: go to tracker_collect jazzHands branch
