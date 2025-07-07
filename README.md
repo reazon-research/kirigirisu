@@ -113,7 +113,7 @@ In one terminal window:
 cd kirigirisu
 
 source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
+source install/setup.bash
 source venv/bin/activate
 
 python3 code/ros2Bridge/bridgeCode/bridgeNode.py
