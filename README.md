@@ -1,8 +1,14 @@
 # 🦗 kirigirisu
 
-Kirigirisu is a Python-based toolkit for interacting with Dynamixel motors.
+Kirigirisu is a Python-based toolkit for an OpenArm puppeteer.
 
 Read joint positions, calibrate motion ranges, and integration with ROS 2 for robot simulation and control.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/30265ec0-d692-4fef-b458-5ef489802560" width="49%" />
+  <img src="https://github.com/user-attachments/assets/0560d242-d860-4c8c-82fa-92c0215c6690" width="49%" />
+</p>
+
 
 ---
 
